@@ -1,9 +1,10 @@
 import asyncio
 import os
-from google import genai
 from google.genai import types
+
 from backend.models import LocationAnalysis, ResearchResult
 from backend.prompts.research import build_research_prompt
+from backend.gemini_client import get_client
 
 _semaphore: asyncio.Semaphore | None = None
 
@@ -19,7 +20,7 @@ def get_semaphore() -> asyncio.Semaphore:
 async def research_period(location: LocationAnalysis, period: str) -> ResearchResult:
     """Research what a Singapore location looked like during a specific period."""
     async with get_semaphore():
-        client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+        client = get_client()
         model = os.getenv("GEMINI_MODEL", "gemini-2.5-pro")
         search_tool = types.Tool(google_search=types.GoogleSearch())
 
@@ -30,8 +31,7 @@ async def research_period(location: LocationAnalysis, period: str) -> ResearchRe
             period=period,
         )
 
-        response = await asyncio.to_thread(
-            client.models.generate_content,
+        response = await client.aio.models.generate_content(
             model=model,
             contents=prompt,
             config=types.GenerateContentConfig(

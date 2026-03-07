@@ -1,11 +1,11 @@
 import asyncio
 import os
 from pathlib import Path
-from google import genai
 from google.genai import types
 from backend.models import LocationAnalysis, ResearchResult
 from backend.prompts.video import build_video_prompt_generation_prompt
 from backend import storage
+from backend.gemini_client import get_client
 
 POLL_INTERVAL = int(os.getenv("VEO_POLL_INTERVAL_SECONDS", "10"))
 MAX_POLL_ATTEMPTS = int(os.getenv("VEO_MAX_POLL_ATTEMPTS", "60"))
@@ -17,7 +17,7 @@ async def generate_video_prompt(
     research: ResearchResult,
 ) -> str:
     """Use Gemini to write a Veo-optimized video prompt from research data."""
-    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    client = get_client()
     model = os.getenv("GEMINI_MODEL", "gemini-2.5-pro")
 
     meta_prompt = build_video_prompt_generation_prompt(
@@ -28,8 +28,7 @@ async def generate_video_prompt(
         street_level_details=research.street_level_details,
     )
 
-    response = await asyncio.to_thread(
-        client.models.generate_content,
+    response = await client.aio.models.generate_content(
         model=model,
         contents=meta_prompt,
     )
@@ -43,14 +42,13 @@ async def generate_video(
     video_prompt: str,
 ) -> Path:
     """Call Veo 3 with reference image + prompt. Poll to completion. Return MP4 path."""
-    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    client = get_client()
     model = os.getenv("VEO_MODEL", "veo-3.0-generate-001")
 
     image_bytes = reference_image_path.read_bytes()
 
     # Submit video generation job (long-running operation)
-    operation = await asyncio.to_thread(
-        client.models.generate_videos,
+    operation = await client.aio.models.generate_videos(
         model=model,
         prompt=video_prompt,
         image=types.Image(
@@ -73,7 +71,7 @@ async def generate_video(
                 f"Veo 3 generation timed out after {MAX_POLL_ATTEMPTS * POLL_INTERVAL}s for period {period}"
             )
         await asyncio.sleep(POLL_INTERVAL)
-        operation = await asyncio.to_thread(operation.refresh)
+        operation = await operation.refresh()
 
     # Extract video bytes
     use_vertex = os.getenv("USE_VERTEX_AI", "false").lower() == "true"

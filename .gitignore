@@ -1,0 +1,21 @@
+# Secrets
+.env
+genai-sa.json
+*-sa.json
+*-service-account.json
+
+# Python
+__pycache__/
+*.pyc
+backend/.venv/
+.venv/
+
+# Next.js
+frontend/.next/
+frontend/node_modules/
+
+# Media uploads
+media/sessions/
+
+# OS
+.DS_Store
