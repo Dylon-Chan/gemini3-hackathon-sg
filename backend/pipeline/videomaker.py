@@ -68,17 +68,19 @@ async def generate_video(
         attempts += 1
         if attempts >= MAX_POLL_ATTEMPTS:
             raise TimeoutError(
-                f"Veo 3 generation timed out after {MAX_POLL_ATTEMPTS * POLL_INTERVAL}s for period {period}"
+                f"Veo generation timed out after {MAX_POLL_ATTEMPTS * POLL_INTERVAL}s for period {period}"
             )
         await asyncio.sleep(POLL_INTERVAL)
-        operation = await operation.refresh()
+        operation = await client.aio.operations.get(operation)
 
-    # Extract video bytes
-    use_vertex = os.getenv("USE_VERTEX_AI", "false").lower() == "true"
-    if use_vertex:
-        video_bytes = await _download_gcs(operation.result.generated_videos[0].video.uri)
+    # Extract video bytes — try direct bytes first, fall back to GCS download
+    video = operation.result.generated_videos[0].video
+    if hasattr(video, "video_bytes") and video.video_bytes:
+        video_bytes = video.video_bytes
+    elif hasattr(video, "uri") and video.uri:
+        video_bytes = await _download_gcs(video.uri)
     else:
-        video_bytes = operation.result.generated_videos[0].video.video_bytes
+        raise ValueError(f"No video data returned for period {period}")
 
     return storage.save_video(session_id, period, video_bytes)
 
