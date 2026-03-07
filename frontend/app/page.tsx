@@ -108,6 +108,7 @@ export default function Home() {
             state={periodStates[period]}
             isSelected={selectedPeriod === period}
             onClick={() => setSelectedPeriod(period)}
+            originalImageUrl={originalImageUrl ?? undefined}
           />
         ))}
       </div>

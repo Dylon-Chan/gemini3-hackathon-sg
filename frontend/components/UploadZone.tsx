@@ -98,7 +98,7 @@ export function UploadZone({ onUpload, isLoading }: Props) {
           >
             <div className="text-7xl drop-shadow-lg">🎬</div>
             <p className="text-zinc-200 text-2xl font-medium tracking-tight">
-              {isDragging ? "Drop to transport" : "Drop a Singapore photo here"}
+              {isDragging ? "Drop to transport" : "Drop a photo here"}
             </p>
             <p className="text-zinc-400 text-sm font-light">
               or click to browse — JPG, PNG, WEBP
