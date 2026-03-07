@@ -44,7 +44,10 @@ export function useSessionSSE(sessionId: string | null) {
 
     es.addEventListener("period_update", (e: MessageEvent) => {
       const data: PeriodState = JSON.parse(e.data);
-      setPeriodStates((prev) => ({ ...prev, [data.period]: data }));
+      setPeriodStates((prev) => ({
+        ...prev,
+        [data.period]: { ...prev[data.period], ...data },
+      }));
     });
 
     es.addEventListener("location_identified", (e: MessageEvent) => {
