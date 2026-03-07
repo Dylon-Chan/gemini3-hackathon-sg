@@ -55,7 +55,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-zinc-950 flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-3 border-b border-zinc-900 shrink-0">
+      <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-3 border-b border-zinc-900 bg-zinc-950/90 backdrop-blur-md shrink-0">
         <h1 className="text-2xl font-black">
           Sing<span className="text-amber-400">Flix</span>
         </h1>
