@@ -9,6 +9,7 @@ interface Props {
   state?: PeriodState;
   isSelected: boolean;
   onClick: () => void;
+  originalImageUrl?: string;
 }
 
 const STAGE_LABELS: Record<string, string> = {
@@ -20,7 +21,7 @@ const STAGE_LABELS: Record<string, string> = {
   error: "Failed",
 };
 
-export function PeriodCard({ period, state, isSelected, onClick }: Props) {
+export function PeriodCard({ period, state, isSelected, onClick, originalImageUrl }: Props) {
   const colors = PERIOD_COLORS[period];
   const stage = state?.stage ?? "pending";
   const isPast = ["1925", "1965", "1985"].includes(period);
@@ -43,7 +44,20 @@ export function PeriodCard({ period, state, isSelected, onClick }: Props) {
     >
       {/* Thumbnail area */}
       <div className="relative aspect-video bg-black/60 overflow-hidden">
-        {state?.reference_image_url && (
+        {/* Present period: show the uploaded photo */}
+        {isPresent && originalImageUrl && (
+          <motion.img
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            src={`${API_BASE}${originalImageUrl}`}
+            alt="Current location"
+            className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+          />
+        )}
+
+        {/* Other periods: show AI-generated reference image */}
+        {!isPresent && state?.reference_image_url && (
           <motion.img
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -77,7 +91,7 @@ export function PeriodCard({ period, state, isSelected, onClick }: Props) {
         )}
 
         {/* No image yet */}
-        {!state?.reference_image_url && (
+        {!state?.reference_image_url && !(isPresent && originalImageUrl) && (
           <div className="absolute inset-0 flex items-center justify-center">
             {stage === "pending" && (
               <span className="text-zinc-600 text-2xl drop-shadow-md">⏸</span>

@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Period, PERIOD_COLORS, PERIOD_LABELS } from "@/lib/constants";
 import { PeriodState } from "@/lib/sse";
 import { API_BASE } from "@/lib/constants";
@@ -13,15 +13,33 @@ interface Props {
 
 export function VideoPlayer({ period, state, originalImageUrl }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isMuted, setIsMuted] = useState(false);
   const colors = PERIOD_COLORS[period];
   const isPresent = period === "present";
 
   useEffect(() => {
     if (videoRef.current && state?.video_url) {
       videoRef.current.load();
-      videoRef.current.play().catch(() => {});
+      videoRef.current.play().catch(() => {
+        // Autoplay with audio may be blocked; unmute on user interaction
+        if (videoRef.current) {
+          videoRef.current.muted = true;
+          setIsMuted(true);
+          videoRef.current.play().catch(() => {});
+        }
+      });
     }
   }, [state?.video_url]);
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
+      if (!videoRef.current.muted) {
+        videoRef.current.play().catch(() => {});
+      }
+    }
+  };
 
   return (
     <motion.div
@@ -60,7 +78,6 @@ export function VideoPlayer({ period, state, originalImageUrl }: Props) {
               className="w-full h-full object-cover"
               autoPlay
               loop
-              muted
               playsInline
             />
           )}
@@ -119,6 +136,21 @@ export function VideoPlayer({ period, state, originalImageUrl }: Props) {
           )}
         </motion.div>
       </AnimatePresence>
+
+      {/* Audio toggle */}
+      {state?.video_url && (
+        <button
+          onClick={toggleMute}
+          className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-black/60 border border-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/80 transition-all hover:scale-110 active:scale-95 cursor-pointer"
+          title={isMuted ? "Unmute" : "Mute"}
+        >
+          {isMuted ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          )}
+        </button>
+      )}
 
       {/* Persistent cinematic overlay & Year */}
       <div className="absolute inset-0 pointer-events-none rounded-3xl border border-white/5 z-20" />

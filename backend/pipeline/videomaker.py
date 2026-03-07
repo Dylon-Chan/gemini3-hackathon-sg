@@ -59,6 +59,7 @@ async def generate_video(
             aspect_ratio="16:9",
             duration_seconds=6,
             number_of_videos=1,
+            generate_audio=True,
         ),
     )
 
