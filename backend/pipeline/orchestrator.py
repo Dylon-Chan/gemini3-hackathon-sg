@@ -1,22 +1,30 @@
 import asyncio
+import logging
 from pathlib import Path
 from backend import sessions as session_store, storage
 from backend.models import Stage, PERIODS
 from backend.pipeline import analyzer, researcher, imager, videomaker
 
+logger = logging.getLogger(__name__)
+
 
 async def run_pipeline(session_id: str):
     """Main pipeline: analyze → parallel(research → image + prompt → video) for all 6 periods."""
+    logger.info("[pipeline] run_pipeline started for session %s", session_id)
     session = await session_store.store.get(session_id)
     if not session:
+        logger.error("[pipeline] session %s not found", session_id)
         return
 
     # Step 1: Analyze location from uploaded image
     try:
+        logger.info("[pipeline] starting location analysis for %s (image_path=%s)", session_id, session.image_path)
         location = await analyzer.analyze_location(session.image_path)
+        logger.info("[pipeline] location identified: %s", location.location_name)
         await session_store.store.update_location(session_id, location)
         await session_store.store.emit(session_id, "location_identified", location.model_dump())
     except Exception as e:
+        logger.exception("[pipeline] location analysis failed for %s", session_id)
         await session_store.store.emit(session_id, "error", {"message": f"Location analysis failed: {e}"})
         return
 

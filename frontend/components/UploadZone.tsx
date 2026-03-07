@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useState } from "react";
+import { motion } from "framer-motion";
 
 interface Props {
   onUpload: (file: File) => void;
@@ -25,32 +26,44 @@ export function UploadZone({ onUpload, isLoading }: Props) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-950 p-8">
+    <div className="flex flex-col items-center justify-center min-h-screen animated-bg p-8 relative overflow-hidden">
+      {/* Decorative gradient orbs */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-[128px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[128px] pointer-events-none" />
+
       {/* Logo */}
-      <div className="mb-12 text-center">
-        <h1 className="text-7xl font-black tracking-tight text-white mb-3">
-          Sing<span className="text-amber-400">Flix</span>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="mb-12 text-center relative z-10"
+      >
+        <h1 className="text-7xl font-black tracking-tight text-white mb-4 drop-shadow-2xl">
+          Sing<span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-amber-600">Flix</span>
         </h1>
-        <p className="text-zinc-400 text-xl">
+        <p className="text-zinc-300 text-xl font-light tracking-wide">
           Upload a Singapore photo. Travel through time.
         </p>
-        <p className="text-zinc-600 text-sm mt-2">
+        <p className="text-zinc-500 text-sm mt-3 tracking-widest uppercase opacity-80">
           AI-powered · 1925 → Now → 2070
         </p>
-      </div>
+      </motion.div>
 
       {/* Drop zone */}
-      <label
+      <motion.label
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
         className={`
-          relative cursor-pointer border-2 border-dashed rounded-2xl
-          w-full max-w-2xl aspect-video flex flex-col items-center justify-center gap-4
-          transition-all duration-300
+          relative cursor-pointer rounded-3xl p-1
+          w-full max-w-2xl aspect-video flex flex-col items-center justify-center gap-6
+          transition-all duration-500 glass-panel shadow-2xl z-10
           ${
             isDragging
-              ? "border-amber-400 bg-amber-400/5 scale-[1.02]"
-              : "border-zinc-700 hover:border-zinc-500 bg-zinc-900"
+              ? "scale-[1.02] bg-zinc-900/60"
+              : "hover:bg-zinc-900/50 hover:shadow-amber-500/10"
           }
-          ${isLoading ? "opacity-50 pointer-events-none" : ""}
+          ${isLoading ? "opacity-50 pointer-events-none scale-95" : ""}
         `}
         onDragOver={(e) => {
           e.preventDefault();
@@ -59,6 +72,9 @@ export function UploadZone({ onUpload, isLoading }: Props) {
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
       >
+        {/* Animated border gradient container */}
+        <div className={`absolute inset-0 rounded-3xl border-2 transition-colors duration-500 ${isDragging ? "border-amber-400" : "border-zinc-700/50 hover:border-zinc-500/50"}`} />
+
         <input
           type="file"
           accept="image/*"
@@ -67,25 +83,37 @@ export function UploadZone({ onUpload, isLoading }: Props) {
           disabled={isLoading}
         />
         {isLoading ? (
-          <>
-            <div className="w-12 h-12 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
-            <p className="text-zinc-400 text-lg">Uploading...</p>
-          </>
+           <motion.div
+             initial={{ opacity: 0 }}
+             animate={{ opacity: 1 }}
+             className="flex flex-col items-center gap-4"
+           >
+             <div className="w-16 h-16 border-4 border-amber-500/30 border-t-amber-400 rounded-full animate-spin shadow-[0_0_15px_rgba(251,191,36,0.3)]" />
+             <p className="text-zinc-300 text-lg font-medium tracking-wide">Initiating time travel...</p>
+           </motion.div>
         ) : (
-          <>
-            <div className="text-6xl">🎬</div>
-            <p className="text-zinc-300 text-xl font-medium">
-              Drop a Singapore photo here
+          <motion.div
+            className="flex flex-col items-center gap-4"
+            animate={{ scale: isDragging ? 1.05 : 1 }}
+          >
+            <div className="text-7xl drop-shadow-lg">🎬</div>
+            <p className="text-zinc-200 text-2xl font-medium tracking-tight">
+              {isDragging ? "Drop to transport" : "Drop a Singapore photo here"}
             </p>
-            <p className="text-zinc-500 text-sm">
+            <p className="text-zinc-400 text-sm font-light">
               or click to browse — JPG, PNG, WEBP
             </p>
-          </>
+          </motion.div>
         )}
-      </label>
+      </motion.label>
 
       {/* Suggestions */}
-      <div className="mt-8 flex flex-wrap gap-2 justify-center max-w-xl">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 0.6 }}
+        className="mt-12 flex flex-wrap gap-3 justify-center max-w-2xl relative z-10"
+      >
         {[
           "Marina Bay Sands",
           "Raffles Hotel",
@@ -96,12 +124,12 @@ export function UploadZone({ onUpload, isLoading }: Props) {
         ].map((place) => (
           <span
             key={place}
-            className="text-xs text-zinc-600 border border-zinc-800 px-2 py-1 rounded-full"
+            className="text-xs font-medium text-zinc-400 bg-zinc-900/50 border border-zinc-800/80 px-4 py-2 rounded-full backdrop-blur-md hover:bg-zinc-800 hover:text-zinc-200 transition-colors cursor-default"
           >
             {place}
           </span>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }
