@@ -36,7 +36,7 @@ def get_client() -> genai.Client:
             # Gemini Developer API (AI Studio key)
             _client = genai.Client(api_key=api_key)
         else:
-            # Vertex AI via service account (GOOGLE_APPLICATION_CREDENTIALS)
+            # Vertex AI via service account
             project = os.getenv("GOOGLE_CLOUD_PROJECT")
             location = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
             if not project:
@@ -44,5 +44,19 @@ def get_client() -> genai.Client:
                     "No auth configured. Set GEMINI_API_KEY for the Developer API, "
                     "or GOOGLE_APPLICATION_CREDENTIALS + GOOGLE_CLOUD_PROJECT for Vertex AI."
                 )
-            _client = genai.Client(vertexai=True, project=project, location=location)
+            credentials_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+            if credentials_file and os.path.isfile(credentials_file):
+                # Explicitly load service account credentials to avoid ADC lookup failures
+                from google.oauth2 import service_account
+                credentials = service_account.Credentials.from_service_account_file(
+                    credentials_file,
+                    scopes=["https://www.googleapis.com/auth/cloud-platform"],
+                )
+                _client = genai.Client(
+                    vertexai=True, project=project, location=location,
+                    credentials=credentials,
+                )
+            else:
+                # Fall back to ADC (works on GCE/Cloud Run/GKE)
+                _client = genai.Client(vertexai=True, project=project, location=location)
     return _client
