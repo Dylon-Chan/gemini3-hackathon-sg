@@ -22,12 +22,6 @@ services:
       - key: VEO_MODEL
         value: veo-3.0-generate-001
 
-      # --- Veo output: Vertex AI returns GCS URIs, not raw bytes ---
-      - key: USE_VERTEX_AI
-        value: "true"
-      - key: VEO_OUTPUT_GCS_BUCKET
-        sync: false          # set manually in Render dashboard
-
       # --- Pipeline tuning ---
       - key: GEMINI_CONCURRENCY
         value: "3"
