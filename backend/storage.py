@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 MEDIA_ROOT = Path("media/sessions")
@@ -25,5 +26,7 @@ def save_video(session_id: str, period: str, data: bytes) -> Path:
 
 
 def media_url(path: Path) -> str:
-    """Convert local path to URL served by FastAPI /media mount."""
-    return "/" + str(path)
+    """Convert local path to absolute URL served by FastAPI /media mount.
+    Uses BASE_URL env var in production so cross-origin frontends resolve correctly."""
+    base = os.getenv("BASE_URL", "").rstrip("/")
+    return base + "/" + str(path).replace("\\", "/")
