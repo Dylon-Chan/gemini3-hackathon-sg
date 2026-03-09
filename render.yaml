@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: singflix-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: PYTHONPATH=. uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-pro
+      - key: GEMINI_IMAGE_MODEL
+        value: gemini-2.0-flash-exp-image-generation
+      - key: VEO_MODEL
+        value: veo-3.0-generate-001
+      - key: GEMINI_CONCURRENCY
+        value: "3"
+      - key: VEO_POLL_INTERVAL_SECONDS
+        value: "10"
+      - key: VEO_MAX_POLL_ATTEMPTS
+        value: "60"
+      - key: USE_VERTEX_AI
+        value: "false"
+      - key: PYTHONUNBUFFERED
+        value: "1"
