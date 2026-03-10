@@ -22,3 +22,16 @@ export async function startProcessing(sessionId: string): Promise<void> {
   });
   if (!res.ok) throw new Error(`Process start failed: ${res.statusText}`);
 }
+
+export interface SessionSnapshot {
+  session_id: string;
+  original_image_url: string;
+  location: unknown;
+  periods: Record<string, unknown>;
+}
+
+export async function fetchSession(sessionId: string): Promise<SessionSnapshot> {
+  const res = await fetch(`${API_BASE}/api/session/${sessionId}`);
+  if (!res.ok) throw new Error(`Session not found: ${res.statusText}`);
+  return res.json();
+}

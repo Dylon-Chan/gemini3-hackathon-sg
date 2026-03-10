@@ -94,6 +94,11 @@ async def event_stream(session_id: str, request: Request):
                     "data": json.dumps(pstate.model_dump()),
                 }
 
+        # If all periods are already done (e.g. restored from disk), close after replay
+        if session_store.store.all_periods_done(session_id):
+            yield {"event": "session_complete", "data": "{}"}
+            return
+
         # Stream new events
         while True:
             if await request.is_disconnected():
