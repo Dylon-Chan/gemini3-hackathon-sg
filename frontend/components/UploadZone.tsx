@@ -42,7 +42,7 @@ export function UploadZone({ onUpload, isLoading }: Props) {
           Sing<span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-amber-600">Flix</span>
         </h1>
         <p className="text-zinc-300 text-xl font-light tracking-wide">
-          Upload a Singapore photo. Travel through time.
+          Upload a landmark photo. Watch Singapore’s story unfold.
         </p>
         <p className="text-zinc-500 text-sm mt-3 tracking-widest uppercase opacity-80">
           AI-powered · 1925 → Now → 2070

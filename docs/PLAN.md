@@ -1511,7 +1511,7 @@ export function UploadZone({ onUpload, isLoading }: Props) {
           Sing<span className="text-amber-400">Flix</span>
         </h1>
         <p className="text-zinc-400 text-lg">
-          Upload a Singapore photo. Travel through time.
+          Upload a landmark photo. Watch Singapore’s story unfold.
         </p>
       </div>
 
